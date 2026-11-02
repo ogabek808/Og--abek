@@ -1,0 +1,61 @@
+*{
+    box-sizing: border-box;
+}
+
+body{
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f2f2f2;
+    font-family: Arial, sans-serif;
+}
+
+.login-card{
+    width: 320px;
+    padding: 30px;
+    background-color: white;
+    border-radius: 12px;
+}
+
+.login-card h2{
+    text-align: center;
+}
+
+
+input{
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    outline:none;
+}
+input:focus{
+    border-color: blue;
+}
+
+button{
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: blue;
+    color: white;
+    cursor: pointer;
+}
+
+
+button:hover{
+    background: darkblue;
+}
+
+button:active{
+    transform: scale(0.96);
+}
+
+button a{
+    text-decoration: none;
+    color: white;
+}

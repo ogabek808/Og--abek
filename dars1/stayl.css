@@ -1,0 +1,35 @@
+*{
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+header{
+    border-bottom: 1px solid #666;
+    height: 70px;
+}
+.continer{
+    display: flex;
+    justify-content: space-between;
+    margin: 0px 40px;
+align-items: center;
+}
+.logo{
+   background-color: red;
+   padding: 5px 10px;
+   border-radius: 5px;
+   margin-top: 10px;
+}
+.logo-red{
+    color:#fff;
+}
+.nav a{
+    gap: 5px;
+    text-decoration: none;
+    color:#000;
+    transition: all 0.3s ease;
+    padding-right: 8px;
+}
+.nav:hover{
+    color: red;
+}

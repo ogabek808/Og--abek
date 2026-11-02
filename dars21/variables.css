@@ -1,0 +1,34 @@
+/* CSS O'zgaruvchilari (Variables) */
+:root {
+  /* Premium Oq-Ko'k ranglar palitrasi */
+  --primary-color: #0d6efd;
+  --primary-hover: #0b5ed7;
+  --primary-light: #e7f1ff;
+  
+  --accent-color: #00d2ff;
+  --telegram-color: #0088cc;
+  --telegram-hover: #0077b5;
+
+  --bg-color: #f4f7fc;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  
+  --border-color: #e2e8f0;
+  --border-focus: #93c5fd;
+
+  /* Shrift va Dizayn parametrlari */
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --border-radius-sm: 8px;
+  --border-radius-md: 16px;
+  --border-radius-lg: 24px;
+  
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 25px -5px rgba(13, 110, 253, 0.1);
+  --shadow-lg: 0 20px 35px -10px rgba(13, 110, 253, 0.2);
+
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

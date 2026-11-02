@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiberxavfsizlik - Test Tizimi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: #1e293b;
+            width: 100%;
+            max-width: 700px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #38bdf8;
+            font-size: 24px;
+        }
+        .start-screen, .quiz-screen, .result-screen {
+            text-align: center;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .btn {
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background: #0ea5e9;
+        }
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #94a3b8;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+        }
+        .timer {
+            color: #f43f5e;
+            font-weight: bold;
+        }
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+        }
+        .option {
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .option:hover {
+            background: #334155;
+            border-color: #38bdf8;
+        }
+        .option.selected {
+            background: #0284c7;
+            border-color: #38bdf8;
+            color: #fff;
+        }
+        .result-box {
+            font-size: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Boshlanish oynasi -->
+        <div id="startScreen" class="start-screen">
+            <h1>🔒 Kiberxavfsizlik Imtihoniga Tayyorgarlik</h1>
+            <p>Ushbu test kiberxavfsizlik asoslari va tarmoq xavfsizligi fanidan bilimlaringizni sinash uchun mo'ljallangan.</p>
+            <p style="margin-top: 10px; color: #94a3b8;">• Savollar soni: 10 ta<br>• Vaqt: 5 daqiqa<br>• Har safar yangi va aralash savollar tushadi!</p>
+            <button class="btn" onclick="startQuiz()">Testni Boshlash</button>
+        </div>
+
+        <!-- Test jarayoni oynasi -->
+        <div id="quizScreen" class="quiz-screen hidden">
+            <div class="quiz-header">
+                <span id="questionCount">Savol: 1 / 10</span>
+                <span class="timer" id="timer">Vaqt: 05:00</span>
+            </div>
+            <div class="question-text" id="questionText">Savol matni shu yerda chiqadi...</div>
+            <div class="options-list" id="optionsList">
+                <!-- Variantlar JavaScript orqali qo'shiladi -->
+            </div>
+            <button class="btn hidden" id="nextBtn" onclick="nextQuestion()">Keyingi savol</button>
+        </div>
+
+        <!-- Natija oynasi -->
+        <div id="resultScreen" class="result-screen hidden">
+            <h1>Test Yakunlandi! 🎉</h1>
+            <div class="result-box" id="resultText">Sizning natijangiz: 0 / 10</div>
+            <button class="btn" onclick="restartQuiz()">Qaytadan Urinish</button>
+        </div>
+    </div>
+
+    <script>
+        // Kiberxavfsizlik faniga oid professional savollar bazasi
+        const questionBank = [
+            {
+                question: "Quyidagilardan qaysi biri 'Ijtimoiy muhandislik' (Social Engineering) hujumiga misol bo'la oladi?",
+                options: ["Phishing (Fishing) xatlari", "DDoS hujumi", "SQL Inyeksiya", "Brute-force hujumi"],
+                answer: 0
+            },
+            {
+                question: "Parollarni himoya qilishda eng ishonchli usul qaysi?",
+                options: ["Tug'ilgan yilni ishlatish", "Faqat harflardan iborat parol", "Harflar, raqamlar va maxsus belgilardan iborat murakkab kombinatsiya", "Ismni teskari yozish"],
+                answer: 2
+            },
+            {
+                question: "VPN (Virtual Private Network) texnologiyasining asosiy vazifasi nima?",
+                options: ["Kompyuter tezligini oshirish", "Internet trafigini shifrlash va maxfiylikni ta'minlash", "Kompyuterdagi viruslarni tozalash", "Internet narxini arzonlashtirish"],
+                answer: 1
+            },
+            {
+                question: "Zararli dasturiy ta'minot (Malware) turiga kirmaydigan variantni toping:",
+                options: ["Trojan (Troyan)", "Ransomware (Fidyekor)", "Firewall (Devor)", "Spyware (Josus dastur)"],
+                answer: 2
+            },
+            {
+                question: "Ikki bosqichli autentifikatsiya (2FA) nima uchun ishlatiladi?",
+                options: ["Faqat internetni tezlashtirish uchun", "Hisob qaydnomasiga qo'shimcha xavfsizlik qatlamini qo'shish uchun", "Parolni eslab qolish uchun", "Kompyuter xotirasini tejash uchun"],
+                answer: 1
+            },
+            {
+                question: "DDoS hujumining asosiy maqsadi nima?",
+                options: ["Ma'lumotlarni o'g'irlash", "Sayt yoki server ish faoliyatini izdan chiqarish (to'xtatib qo'yish)", "Parolni buzib kirish", "Kompyuter ekranini bloklash"],
+                answer: 1
+            },
+            {
+                question: "Kriptografiyada 'Simmetrik shifrlash' ning asosiy xususiyati nimada?",
+                options: ["Shifrlash va deshifrlash uchun bir xil kalit ishlatiladi", "Faqat ochiq kalit ishlatiladi", "Kalit umuman ishlatilmaydi", "Faqat internet orqali ishlaydi"],
+                answer: 0
+            },
+            {
+                question: "Xavfsizlik devori (Firewall) vazifasi nima?",
+                options: ["Fayllarni arxivlash", "Tarmoq trafigini kuzatish va ruxsatsiz kirishlarning oldini olish", "Kompyuter qismlarini sovutish", "Brauzer tarixini tozalash"],
+                answer: 1
+            },
+            {
+                question: "Fishing (Phishing) hujumining asosiy nishoni nima?",
+                options: ["Foydalanuvchining shaxsiy ma'lumotlari, parollari va bank rekvizitlari", "Qattiq diskdagi bo'sh joy", "Monitor ekrani o'lchami", "Protsessor tezligi"],
+                answer: 0
+            },
+            {
+                question: "SSL/TLS sertifikatlari veb-saytda nima uchun kerak?",
+                options: ["Sayt dizaynini chiroyli qilish uchun", "Brauzer va server o'rtasidagi ma'lumotlarni xavfsiz va shifrlangan holda uzatish uchun", "Saytga reklama qo'shish uchun", "Foydalanuvchilar sonini ko'rsatish uchun"],
+                answer: 1
+            },
+            {
+                question: "Zero-Day (Nolinchi kun) zaifligi nima?",
+                options: ["Eski va tuzatilgan xatolik", "Dasturchilar va ishlab chiqaruvchilar hali bilmaydigan va rasmiy yechimi chiqmagan zaiflik", "Faqat kechasi ishlaydigan virus", "Kompyuter yangilangandagi xatolik"],
+                answer: 1
+            },
+            {
+                question: "Ransomware (Fidyekor virus) kompyuterga tushgach nima qiladi?",
+                options: ["Barcha fayllarni shifrlab, ochish uchun pul (fidya) talab qiladi", "Faqat internetni o'chirib qo'yadi", "Ekranga kulgili rasmlar chiqaradi", "Fayllarni o'z-o'zidan o'chirib tashlaydi"],
+                answer: 0
+            }
+        ];
+
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+        let timerInterval;
+        let timeLeft = 300; // 5 daqiqa (300 soniya)
+
+        const startScreen = document.getElementById('startScreen');
+        const quizScreen = document.getElementById('quizScreen');
+        const resultScreen = document.getElementById('resultScreen');
+        const questionText = document.getElementById('questionText');
+        const optionsList = document.getElementById('optionsList');
+        const nextBtn = document.getElementById('nextBtn');
+        const questionCount = document.getElementById('questionCount');
+        const timerDisplay = document.getElementById('timer');
+        const resultText = document.getElementById('resultText');
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+
+            // Savollarni aralashtirish va har safar 10 tasini tasodifiy tanlab olish
+            currentQuestions = [...questionBank].sort(() => Math.random() - 0.5).slice(0, 10);
+            currentIndex = 0;
+            score = 0;
+            timeLeft = 300;
+
+            startTimer();
+            loadQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    showResults();
+                    return;
+                }
+                timeLeft--;
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                timerDisplay.innerText = `Vaqt: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            selectedOption = null;
+            nextBtn.classList.add('hidden');
+            
+            const q = currentQuestions[currentIndex];
+            questionCount.innerText = `Savol: ${currentIndex + 1} / ${currentQuestions.length}`;
+            questionText.innerText = q.question;
+
+            // Variantlarni ham aralashtirish uchun indekslari bilan saqlaymiz
+            let optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, originalIndex: idx }));
+            optionsWithIndex.sort(() => Math.random() - 0.5);
+
+            optionsList.innerHTML = '';
+            optionsWithIndex.forEach((opt) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.innerText = opt.text;
+                div.onclick = () => selectOption(div, opt.originalIndex, q.answer);
+                optionsList.appendChild(div);
+            });
+        }
+
+        function selectOption(element, optIndex, correctAnswer) {
+            // Avvalgi tanlovni olib tashlash
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            
+            element.classList.add('selected');
+            selectedOption = optIndex;
+            
+            // To'g'ri javobni tekshirish
+            if (selectedOption === correctAnswer) {
+                // Ball faqat bir marta qo'shilishi uchun tekshiruv qilish mumkin yoki sodda tarzda
+            }
+            
+            nextBtn.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            if (selectedOption === currentQuestions[currentIndex].answer) {
+                score++;
+            }
+
+            currentIndex++;
+            if (currentIndex < currentQuestions.length) {
+                loadQuestion();
+            } else {
+                clearInterval(timerInterval);
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            let percentage = (score / currentQuestions.length) * 100;
+            let message = percentage >= 70 ? "Tabriklaymiz! Imtihondan o'tdingiz! 🏆" : "Yaxshiroq tayyorgarlik ko'rish kerak! 📚";
+            
+            resultText.innerHTML = `Sizning natijangiz: <b>${score} / ${currentQuestions.length}</b> ta to'g'ri (${percentage}%)<br><br><span style="color: ${percentage >= 70 ? '#4ade80' : '#f43f5e'}">${message}</span>`;
+        }
+
+        function restartQuiz() {
+            resultScreen.classList.add('hidden');
+            startQuiz();
+        }
+    </script>
+</body>
+</html>

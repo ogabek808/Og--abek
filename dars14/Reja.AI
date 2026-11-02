@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#4f46e5">
+<title>RejaAI — kuningni rejalashtir</title>
+<style>
+:root{--primary:#5145e5;--primary-dark:#3930ad;--ink:#18213c;--muted:#68738b;--bg:#f5f7ff;--line:#e6e9f5;--green:#15803d;--red:#b91c1c}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+header{position:sticky;top:0;z-index:10;background:#ffffffed;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav{max-width:1100px;margin:auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{font-size:23px;font-weight:850;letter-spacing:-.7px;color:var(--primary)}.brand span{color:var(--ink)}
+.nav-note{font-size:13px;color:var(--muted)}
+main{max-width:1100px;margin:auto;padding:28px 20px 55px}
+.hero{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:28px;border-radius:22px;background:linear-gradient(120deg,#e9eaff,#e5f3ff);margin-bottom:22px}
+.hero h1{font-size:clamp(27px,4vw,39px);line-height:1.15;margin:7px 0 10px;letter-spacing:-1px}
+.hero p{max-width:590px;color:#4c5875;margin:0}
+.pill{display:inline-block;padding:5px 10px;border-radius:99px;background:#fff;color:var(--primary);font-size:12px;font-weight:800}
+.hero-art{font-size:76px;white-space:nowrap}
+.btn{border:0;background:var(--primary);color:white;padding:11px 16px;border-radius:11px;font-weight:750;transition:.15s}
+.btn:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.btn.secondary{background:#eeefff;color:var(--primary)}.btn.secondary:hover{background:#dedfff}
+.btn.danger{background:#fff0f0;color:var(--red)}.btn.small{padding:7px 10px;font-size:13px}
+.layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.8fr);gap:20px;align-items:start}
+.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:21px;box-shadow:0 7px 25px #18213c08;margin-bottom:20px}
+.panel h2{font-size:20px;margin:0 0 5px}.sub{font-size:13px;color:var(--muted);margin:0 0 18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}
+label{font-size:13px;font-weight:750;color:#39445f}
+input,select,textarea{width:100%;border:1px solid #d9deec;border-radius:10px;padding:11px 12px;background:#fff;color:var(--ink);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px #5145e51a}
+textarea{resize:vertical;min-height:74px}
+.form-actions{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:18px 0 12px}
+.toolbar h2{margin:0;font-size:20px}.filters{display:flex;gap:7px;flex-wrap:wrap}
+.filter{border:1px solid var(--line);background:white;padding:7px 10px;border-radius:9px;font-size:13px;color:#47516a}
+.filter.active{background:#eeefff;color:var(--primary);border-color:#d7d5ff;font-weight:800}
+.task-list{display:grid;gap:10px}
+.task{display:flex;gap:12px;align-items:flex-start;background:white;border:1px solid var(--line);border-radius:14px;padding:14px}
+.task.done{opacity:.68}.task.done .task-title{text-decoration:line-through}
+.check{width:21px;height:21px;accent-color:var(--primary);flex:0 0 auto;margin-top:3px}
+.task-main{flex:1;min-width:0}.task-title{font-weight:800;overflow-wrap:anywhere}.task-note{font-size:13px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:11px;padding:4px 7px;border-radius:7px;background:#f0f2f8;color:#536079}
+.tag.high{background:#fff0ed;color:#b93822}.tag.medium{background:#fff6df;color:#956400}.tag.low{background:#e7f8ee;color:#187445}
+.task-actions{display:flex;gap:5px;align-items:center}
+.icon-btn{border:0;background:#f3f4fa;border-radius:8px;padding:7px;color:#58627a}
+.icon-btn:hover{background:#e6e8f5}
+.empty{text-align:center;color:var(--muted);padding:25px 10px;border:1px dashed #cdd3e6;border-radius:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:15px 0}
+.stat{background:#f6f7ff;border-radius:12px;padding:13px 9px;text-align:center}
+.stat strong{display:block;font-size:25px;color:var(--primary)}.stat span{font-size:11px;color:var(--muted)}
+.progress-track{height:9px;background:#eceef8;border-radius:99px;overflow:hidden}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#5145e5,#37b7df);transition:width .25s}
+.tip{background:#f0fdf4;border:1px solid #d0f2dc;border-radius:13px;padding:13px;color:#21623b;font-size:13px}
+.plan-day{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.plan-day:last-child{border-bottom:0}
+.plan-day strong{font-size:13px}.plan-day span{font-size:12px;color:var(--muted)}
+footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#18213c;color:white;padding:11px 16px;border-radius:10px;box-shadow:0 8px 30px #0002;display:none;z-index:20;font-size:14px;max-width:90vw}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.hero{padding:22px}.hero-art{font-size:52px}.nav-note{display:none}}
+@media(max-width:470px){main{padding:18px 12px 40px}.nav{padding:12px}.hero{align-items:flex-start}.hero-art{display:none}.panel{padding:16px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.stats{grid-template-columns:repeat(3,1fr)}.stat strong{font-size:22px}.task{padding:11px}.task-actions{flex-direction:column}}
+</style>
+</head>
+<body>
+<header><div class="nav"><div class="brand">✦ Reja<span>AI</span></div><div class="nav-note">Oddiy reja. Katta natija.</div><button class="btn secondary small" id="exportBtn">⬇ Rejani yuklab olish</button></div></header>
+<main>
+<section class="hero">
+ <div><span class="pill">BEPUL REJALASHTIRUVCHI</span><h1>Bugungi rejangni tuz.<br><span style="color:var(--primary)">Maqsadingga yaqinlash.</span></h1><p>Vazifalaringni yoz, muhimligini belgilab ol va bajarilgan ishlaringni kuzat. Ma’lumotlaring shu qurilmada saqlanadi.</p></div>
+ <div class="hero-art" aria-hidden="true">🗓️✨</div>
+</section>
+<div class="layout">
+<div>
+ <section class="panel">
+  <h2 id="formTitle">➕ Yangi vazifa</h2><p class="sub">Kichik vazifalardan boshlash osonroq.</p>
+  <form id="taskForm">
+   <div class="form-grid">
+    <div class="field full"><label for="title">Vazifa nomi *</label><input id="title" maxlength="100" required placeholder="Masalan: HTML darsini takrorlash"></div>
+    <div class="field"><label for="date">Sana</label><input id="date" type="date" required></div>
+    <div class="field"><label for="time">Vaqt (ixtiyoriy)</label><input id="time" type="time"></div>
+    <div class="field"><label for="priority">Muhimlik darajasi</label><select id="priority"><option value="high">Muhim</option><option value="medium" selected>O‘rtacha</option><option value="low">Keyinroq</option></select></div>
+    <div class="field"><label for="category">Yo‘nalish</label><select id="category"><option>O‘qish</option><option>Ish</option><option>Shaxsiy</option><option>Startup</option><option>Boshqa</option></select></div>
+    <div class="field full"><label for="note">Izoh (ixtiyoriy)</label><textarea id="note" maxlength="300" placeholder="Vazifani bajarish uchun kerakli eslatma..."></textarea></div>
+   </div>
+   <div class="form-actions"><button class="btn" id="saveBtn" type="submit">Vazifani qo‘shish</button><button class="btn secondary" type="reset" id="cancelEdit" hidden>Bekor qilish</button></div>
+  </form>
+ </section>
+ <div class="toolbar"><h2>📌 Vazifalarim</h2><div class="filters" id="filters"><button class="filter active" data-filter="all">Barchasi</button><button class="filter" data-filter="today">Bugun</button><button class="filter" data-filter="open">Bajarilmagan</button><button class="filter" data-filter="done">Bajarilgan</button></div></div>
+ <div id="taskList" class="task-list"></div>
+</div>
+<aside>
+ <section class="panel">
+  <h2>📊 Bugungi holat</h2><p class="sub" id="todayLabel"></p>
+  <div class="stats"><div class="stat"><strong id="totalCount">0</strong><span>Vazifalar</span></div><div class="stat"><strong id="doneCount">0</strong><span>Bajarildi</span></div><div class="stat"><strong id="openCount">0</strong><span>Qoldi</span></div></div>
+  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px"><strong>Bajarilish</strong><span id="percent">0%</span></div><div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+ </section>
+ <section class="panel">
+  <h2>🗓️ 7 kunlik ko‘rinish</h2><p class="sub">Har kun uchun vazifalar soni</p><div id="weekPlan"></div>
+ </section>
+ <div class="tip">💡 <strong>Reja maslahati</strong><br>Bugun eng muhim 1–3 vazifani tanla. Katta ishni kichik qadamlarga bo‘l va bajarilganda belgilab bor.</div>
+ <section class="panel" style="margin-top:20px">
+  <h2>🔒 Maxfiylik</h2><p class="sub" style="margin-bottom:0">Vazifalaring brauzeringning localStorage xotirasida saqlanadi. Sayt serverga ma’lumot yubormaydi. Boshqa qurilmada avtomatik ko‘rinmaydi.</p>
+ </section>
+</aside>
+</div>
+</main>
+<footer>© 2026 RejaAI · Bepul MVP · O‘quv va kundalik rejalashtirish uchun</footer>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $=id=>document.getElementById(id);
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+let tasks=[],filter='all',editingId=null,toastTimer;
+try{const saved=localStorage.getItem('rejaai_tasks_v1');tasks=saved?JSON.parse(saved):[]}catch(e){tasks=[]}
+if(!Array.isArray(tasks))tasks=[];
+$('date').value=today();
+$('todayLabel').textContent=new Date().toLocaleDateString('uz-UZ',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+function persist(){try{localStorage.setItem('rejaai_tasks_v1',JSON.stringify(tasks));return true}catch(e){notify('Brauzer xotirasiga saqlab bo‘lmadi.');return false}}
+function notify(s){const t=$('toast');t.textContent=s;t.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.display='none',2600)}
+function escapeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){
+ const list=$('taskList');list.replaceChildren();
+ let shown=tasks.filter(t=>filter==='today'?t.date===today():filter==='open'?!t.done:filter==='done'?t.done:true);
+ shown.sort((a,b)=>(a.done-b.done)||a.date.localeCompare(b.date)||(a.time||'').localeCompare(b.time||'')||({high:0,medium:1,low:2}[a.priority]-{high:0,medium:1,low:2}[b.priority]));
+ if(!shown.length){const d=document.createElement('div');d.className='empty';d.textContent=filter==='today'?'Bugun uchun vazifa yo‘q. Yangi vazifa qo‘sh!':'Bu ro‘yxatda hozircha vazifa yo‘q. Yangi vazifa qo‘shib ko‘r!';list.append(d)}
+ shown.forEach(t=>{
+  const el=document.createElement('article');el.className='task'+(t.done?' done':'');
+  const check=document.createElement('input');check.type='checkbox';check.className='check';check.checked=!!t.done;check.setAttribute('aria-label','Vazifani bajarilgan deb belgilash');check.addEventListener('change',()=>{t.done=check.checked;persist();render()});
+  const main=document.createElement('div');main.className='task-main';
+  const title=document.createElement('div');title.className='task-title';title.textContent=t.title;main.append(title);
+  if(t.note){const note=document.createElement('div');note.className='task-note';note.textContent=t.note;main.append(note)}
+  const meta=document.createElement('div');meta.className='meta';
+  const dateTag=document.createElement('span');dateTag.className='tag';dateTag.textContent=(t.date===today()?'Bugun':t.date)+(t.time?' · '+t.time:'');meta.append(dateTag);
+  const p=document.createElement('span');p.className='tag '+t.priority;p.textContent=({high:'Muhim',medium:'O‘rtacha',low:'Keyinroq'})[t.priority]||'O‘rtacha';meta.append(p);
+  const c=document.createElement('span');c.className='tag';c.textContent=t.category||'Boshqa';meta.append(c);main.append(meta);
+  const actions=document.createElement('div');actions.className='task-actions';
+  const edit=document.createElement('button');edit.className='icon-btn';edit.textContent='✎';edit.title='Tahrirlash';edit.setAttribute('aria-label','Tahrirlash');edit.addEventListener('click',()=>editTask(t.id));
+  const del=document.createElement('button');del.className='icon-btn';del.textContent='×';del.title='O‘chirish';del.setAttribute('aria-label','O‘chirish');del.addEventListener('click',()=>deleteTask(t.id));
+  actions.append(edit,del);el.append(check,main,actions);list.append(el);
+ });
+ const done=tasks.filter(t=>t.done).length,open=tasks.length-done,pct=tasks.length?Math.round(done/tasks.length*100):0;
+ $('totalCount').textContent=tasks.length;$('doneCount').textContent=done;$('openCount').textContent=open;$('percent').textContent=pct+'%';$('progress').style.width=pct+'%';
+ const week=$('weekPlan');week.replaceChildren();
+ for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()+i);const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;const row=document.createElement('div');row.className='plan-day';const left=document.createElement('strong');left.textContent=i===0?'Bugun':d.toLocaleDateString('uz-UZ',{weekday:'short',day:'numeric',month:'short'});const right=document.createElement('span');const count=tasks.filter(t=>t.date===key).length;right.textContent=count+' ta vazifa';row.append(left,right);week.append(row)}
+}
+function resetForm(){editingId=null;$('taskForm').reset();$('date').value=today();$('formTitle').textContent='➕ Yangi vazifa';$('saveBtn').textContent='Vazifani qo‘shish';$('cancelEdit').hidden=true}
+function editTask(id){const t=tasks.find(x=>x.id===id);if(!t)return;editingId=id;$('title').value=t.title;$('date').value=t.date;$('time').value=t.time||'';$('priority').value=t.priority;$('category').value=t.category;$('note').value=t.note||'';$('formTitle').textContent='✏️ Vazifani tahrirlash';$('saveBtn').textContent='O‘zgarishni saqlash';$('cancelEdit').hidden=false;$('title').focus();window.scrollTo({top:0,behavior:'smooth'})}
+function deleteTask(id){if(!confirm('Bu vazifani o‘chirmoqchimisiz?'))return;tasks=tasks.filter(t=>t.id!==id);persist();render();if(editingId===id)resetForm();notify('Vazifa o‘chirildi')}
+$('taskForm').addEventListener('submit',e=>{e.preventDefault();const title=$('title').value.trim();if(!title)return;const data={title,date:$('date').value||today(),time:$('time').value,priority:$('priority').value,category:$('category').value,note:$('note').value.trim()};if(editingId){const i=tasks.findIndex(t=>t.id===editingId);if(i>=0)tasks[i]={...tasks[i],...data}}else tasks.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),...data,done:false});persist();resetForm();render();notify(editingId?'O‘zgarishlar saqlandi':'Vazifa qo‘shildi')});
+$('cancelEdit').addEventListener('click',resetForm);
+$('filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;filter=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));render()});
+$('exportBtn').addEventListener('click',()=>{const lines=['RejaAI — vazifalar ro‘yxati','Sana: '+today(),''];if(!tasks.length)lines.push('Hozircha vazifa yo‘q.');tasks.forEach((t,i)=>lines.push(`${i+1}. [${t.done?'x':' '}] ${t.title} | ${t.date}${t.time?' '+t.time:''} | ${t.priority} | ${t.category}${t.note?' | '+t.note:''}`));const blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='rejaai-vazifalar.txt';a.click();URL.revokeObjectURL(url);notify('Reja fayli yuklab olindi')});
+render();
+</script>
+</body>
+</html>

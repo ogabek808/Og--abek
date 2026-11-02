@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLS Ultimate 2026 - Pro Football</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #031b14; color: #fff; }
+        .stadium-bg { 
+            background: linear-gradient(135deg, #047857 0%, #065f46 50%, #022c22 100%);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-4 select-none overflow-x-hidden">
+
+    <!-- HEADER / DLS MATCHDAY HUD -->
+    <header class="w-full max-w-5xl bg-emerald-950/95 backdrop-blur-2xl border border-emerald-500/40 px-6 py-3 rounded-3xl flex items-center justify-between shadow-2xl">
+        <div class="flex items-center space-x-3">
+            <div class="w-11 h-11 bg-gradient-to-tr from-amber-500 to-yellow-400 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/30 text-emerald-950 font-black text-xl">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+                <h1 class="font-black text-lg tracking-wider text-white">DLS <span class="text-amber-400">ULTIMATE LEAGUE</span></h1>
+                <div class="flex items-center space-x-2">
+                    <span id="gameModeText" class="text-[10px] bg-emerald-900 text-emerald-300 font-bold px-2 py-0.5 rounded-md uppercase border border-emerald-600/40">1 O'yinchi (Bot)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCORE & TIMER -->
+        <div class="flex items-center space-x-5 bg-emerald-900/90 px-6 py-2 rounded-2xl border border-emerald-500/40 shadow-inner">
+            <div class="text-center">
+                <span id="p1Label" class="text-[9px] text-cyan-400 font-black uppercase block tracking-wider">Siz (FC Uz)</span>
+                <span id="playerScore" class="text-2xl font-black text-cyan-300">0</span>
+            </div>
+            <div class="text-center px-3 border-x border-emerald-700/60">
+                <span class="text-[9px] text-amber-400 font-bold uppercase block">Vaqt</span>
+                <span id="gameTimer" class="text-xl font-black text-amber-300">01:30</span>
+            </div>
+            <div class="text-center">
+                <span id="p2Label" class="text-[9px] text-rose-400 font-black uppercase block tracking-wider">Bot (FC Red)</span>
+                <span id="botScore" class="text-2xl font-black text-rose-300">0</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button onclick="switchMode()" class="bg-emerald-900 hover:bg-emerald-800 text-emerald-300 font-bold px-3 py-2.5 rounded-xl text-xs border border-emerald-600/40 transition">
+                <i class="fa-solid fa-users mr-1"></i> <span id="modeBtnText">2-O'yinchi</span>
+            </button>
+            <button onclick="resetGame()" class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 text-emerald-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-lg shadow-amber-500/20 transition active:scale-95">
+                <i class="fa-solid fa-rotate-right"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN GAME CANVAS -->
+    <main class="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 space-y-3">
+        <div class="relative">
+            <canvas id="footballField" width="940" height="520" class="stadium-bg rounded-3xl border-4 border-emerald-400/50 cursor-crosshair"></canvas>
+            
+            <!-- GOAL / FULLTIME POPUP BANNER -->
+            <div id="goalPopup" class="absolute inset-0 flex items-center justify-center bg-black/75 backdrop-blur-md rounded-3xl opacity-0 pointer-events-none transition duration-300">
+                <div class="text-center space-y-2 scale-50 transition duration-300 transform" id="goalPopupContent">
+                    <h2 id="popupTitle" class="text-6xl font-black text-amber-400 tracking-wider drop-shadow-[0_10px_25px_rgba(245,158,11,0.6)]">GOL! ⚽🔥</h2>
+                    <p id="popupSub" class="text-emerald-300 font-bold text-sm tracking-widest uppercase">Ajoyib hujum va zarba!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTROLS GUIDE -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-940 text-xs text-emerald-300/80 font-bold px-2">
+            <div class="bg-emerald-950/60 p-2.5 rounded-xl border border-emerald-800/60 flex items-center justify-between">
+                <span>🔵 1-O'yinchi: Sichqoncha / Ekranda surish</span>
+                <span class="bg-cyan-900 text-cyan-300 px-2 py-0.5 rounded text-[10px]">Zarba: Probey / Tap</span>
+            </div>
+            <div id="p2ControlGuide" class="bg-emerald-950/60 p-2.5 rounded-xl border border-emerald-800/60 flex items-center justify-between opacity-50">
+                <span>🔴 2-O'yinchi (Do'st): WASD tugmalari</span>
+                <span class="bg-rose-900 text-rose-300 px-2 py-0.5 rounded text-[10px]">Zarba: Shift</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full max-w-5xl text-center text-[11px] text-emerald-400/60 font-bold py-1">
+        <p>DLS Ultimate 2026 Pro Edition &bull; High Performance JS Engine</p>
+    </footer>
+
+    <!-- JAVASCRIPT GAME ENGINE -->
+    <script>
+        const canvas = document.getElementById('footballField');
+        const ctx = canvas.getContext('2d');
+
+        let playerScore = 0;
+        let botScore = 0;
+        let gameTime = 90; // sekund
+        let isTwoPlayerMode = false;
+        let gameActive = true;
+
+        // Timer intervali
+        setInterval(() => {
+            if (gameActive && gameTime > 0) {
+                gameTime--;
+                let m = Math.floor(gameTime / 60).toString().padStart(2, '0');
+                let s = (gameTime % 60).toString().padStart(2, '0');
+                document.getElementById('gameTimer').innerText = `${m}:${s}`;
+                
+                if (gameTime === 0) {
+                    gameActive = false;
+                    let winnerText = playerScore > botScore ? "1-O'YINCHI G'OLIB! 🏆" : (botScore > playerScore ? (isTwoPlayerMode ? "2-O'YINCHI G'OLIB! 🏆" : "BOT G'OLIB BO'LDI! 🤖") : "DURRANG! 🤝");
+                    triggerPopup(winnerText, "O'yin yakunlandi!");
+                }
+            }
+        }, 1000);
+
+        // Audio Sintetizator (Hushtak va zarba tovushlari)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'kick') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'goal') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(350, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+            }
+        }
+
+        // O'yin obyektlari
+        const player1 = { x: 200, y: 260, radius: 23, color: '#06b6d4', accent: '#0891b2', name: '10' };
+        const player2 = { x: 740, y: 260, radius: 23, color: '#f43f5e', accent: '#e11d48', name: '9' };
+        const ball = { x: 470, y: 260, radius: 12, vx: 0, vy: 0 };
+
+        let mouseX = player1.x;
+        let mouseY = player1.y;
+        let keys = {};
+
+        // Klaviatura boshqaruvi (2-o'yinchi uchun WASD)
+        window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+        window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+        // Sichqoncha va Touch boshqaruvi (1-o'yinchi)
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.touches[0].clientX - rect.left;
+            mouseY = e.touches[0].clientY - rect.top;
+            e.preventDefault();
+        }, { passive: false });
+
+        function switchMode() {
+            isTwoPlayerMode = !isTwoPlayerMode;
+            document.getElementById('gameModeText').innerText = isTwoPlayerMode ? "2 O'yinchi (Do'st)" : "1 O'yinchi (Bot)";
+            document.getElementById('modeBtnText').innerText = isTwoPlayerMode ? "1-O'yinchi" : "2-O'yinchi";
+            document.getElementById('p2Label').innerText = isTwoPlayerMode ? "2-O'yinchi (Qizil)" : "Bot (FC Red)";
+            document.getElementById('p2ControlGuide').style.opacity = isTwoPlayerMode ? "1" : "0.5";
+            resetGame();
+        }
+
+        function update() {
+            if (!gameActive) return;
+
+            // 1-O'yinchi harakati (Sichqoncha / Touch)
+            let dx = mouseX - player1.x;
+            let dy = mouseY - player1.y;
+            player1.x += dx * 0.2;
+            player1.y += dy * 0.2;
+
+            // Chegaralar (1-o'yinchi maydonda)
+            if (player1.x < player1.radius) player1.x = player1.radius;
+            if (player1.x > canvas.width - player1.radius) player1.x = canvas.width - player1.radius;
+            if (player1.y < player1.radius) player1.y = player1.radius;
+            if (player1.y > canvas.height - player1.radius) player1.y = canvas.height - player1.radius;
+
+            // 2-O'yinchi yoki Bot harakati
+            if (isTwoPlayerMode) {
+                let speed = 5;
+                if (keys['KeyW']) player2.y -= speed;
+                if (keys['KeyS']) player2.y += speed;
+                if (keys['KeyA']) player2.x -= speed;
+                if (keys['KeyD']) player2.x += speed;
+
+                if (player2.x < player2.radius) player2.x = player2.radius;
+                if (player2.x > canvas.width - player2.radius) player2.x = canvas.width - player2.radius;
+                if (player2.y < player2.radius) player2.y = player2.radius;
+                if (player2.y > canvas.height - player2.radius) player2.y = canvas.height - player2.radius;
+            } else {
+                // Bot AI
+                let botSpeed = 3.7;
+                let botDx = ball.x - player2.x;
+                let botDy = ball.y - player2.y;
+                let dist = Math.sqrt(botDx * botDx + botDy * botDy);
+                if (dist > 1) {
+                    player2.x += (botDx / dist) * botSpeed;
+                    player2.y += (botDy / dist) * botSpeed;
+                }
+                if (player2.x < canvas.width / 2 - 40) player2.x = canvas.width / 2 - 40;
+                if (player2.x > canvas.width - player2.radius) player2.x = canvas.width - player2.radius;
+                if (player2.y < player2.radius) player2.y = player2.radius;
+                if (player2.y > canvas.height - player2.radius) player2.y = canvas.height - player2.radius;
+            }
+
+            // To'p harakati va ishqalanish
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+            ball.vx *= 0.985;
+            ball.vy *= 0.985;
+
+            // Devorlar bilan to'qnashuv
+            if (ball.y - ball.radius < 0) { ball.y = ball.radius; ball.vy *= -0.8; }
+            if (ball.y + ball.radius > canvas.height) { ball.y = canvas.height - ball.radius; ball.vy *= -0.8; }
+
+            if (ball.y < 140 || ball.y > 380) {
+                if (ball.x - ball.radius < 0) { ball.x = ball.radius; ball.vx *= -0.8; }
+                if (ball.x + ball.radius > canvas.width) { ball.x = canvas.width - ball.radius; ball.vx *= -0.8; }
+            }
+
+            // GOL TEKSHIRISH
+            if (ball.x - ball.radius <= 10) {
+                if (ball.y >= 140 && ball.y <= 380) {
+                    botScore++;
+                    document.getElementById('botScore').innerText = botScore;
+                    playSound('goal');
+                    triggerPopup(isTwoPlayerMode ? "2-O'YINCHI GOL URDI! ⚽" : "BOT GOL URDI!", "Ajoyib hujum!");
+                    resetPositions();
+                }
+            }
+            if (ball.x + ball.radius >= canvas.width - 10) {
+                if (ball.y >= 140 && ball.y <= 380) {
+                    playerScore++;
+                    document.getElementById('playerScore').innerText = playerScore;
+                    playSound('goal');
+                    triggerPopup("1-O'YINCHI GOL URDI! ⚽", "Mukammal zarba!");
+                    resetPositions();
+                }
+            }
+
+            // To'qnashuvlar
+            checkCollision(player1);
+            checkCollision(player2);
+        }
+
+        function checkCollision(p) {
+            let dx = ball.x - p.x;
+            let dy = ball.y - p.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            let minDist = p.radius + ball.radius;
+
+            if (distance < minDist) {
+                let angle = Math.atan2(dy, dx);
+                let power = 9.5;
+                ball.vx = Math.cos(angle) * power;
+                ball.vy = Math.sin(angle) * power;
+                playSound('kick');
+            }
+        }
+
+        function triggerPopup(title, sub) {
+            const popup = document.getElementById('goalPopup');
+            const content = document.getElementById('goalPopupContent');
+            document.getElementById('popupTitle').innerText = title;
+            document.getElementById('popupSub').innerText = sub;
+
+            popup.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-50');
+            content.classList.add('scale-100');
+
+            setTimeout(() => {
+                popup.classList.add('opacity-0', 'pointer-events-none');
+                content.classList.remove('scale-100');
+                content.classList.add('scale-50');
+            }, 1600);
+        }
+
+        function resetPositions() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.vx = 0;
+            ball.vy = 0;
+            player1.x = 200;
+            player1.y = 260;
+            player2.x = 740;
+            player2.y = 260;
+        }
+
+        function resetGame() {
+            playerScore = 0;
+            botScore = 0;
+            gameTime = 90;
+            gameActive = true;
+            document.getElementById('playerScore').innerText = 0;
+            document.getElementById('botScore').innerText = 0;
+            document.getElementById('gameTimer').innerText = "01:30";
+            resetPositions();
+        }
+
+        function drawField() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Maysa naqshlari
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+            for (let i = 0; i < canvas.width; i += 70) {
+                if ((i / 70) % 2 === 0) ctx.fillRect(i, 0, 70, canvas.height);
+            }
+
+            // Maydon chiziqlari
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+            ctx.lineWidth = 4;
+
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, 85, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Jarima maydonchalari va darvozalar
+            ctx.strokeRect(0, 90, 150, 340);
+            ctx.strokeRect(canvas.width - 150, 90, 150, 340);
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.fillRect(0, 140, 12, 240);
+            ctx.fillRect(canvas.width - 12, 140, 12, 240);
+
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 5;
+            ctx.strokeRect(0, 140, 12, 240);
+            ctx.strokeRect(canvas.width - 12, 140, 12, 240);
+
+            // O'yinchilarni chizish
+            drawPlayer(player1);
+            drawPlayer(player2);
+
+            // To'pni chizish
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawPlayer(p) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+            ctx.beginPath();
+            ctx.arc(p.x, p.y + 6, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = p.accent;
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px "Plus Jakarta Sans"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(p.name, p.x, p.y);
+        }
+
+        function gameLoop() {
+            update();
+            drawField();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>

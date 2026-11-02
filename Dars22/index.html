@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="uz" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UzTranslate Voice - O'zbekcha / Inglizcha Ovozli Tarjimon</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00d2ff',
+                        },
+                        dark: {
+                            bg: '#0b0f19',
+                            card: '#111827',
+                            hover: '#1f2937',
+                            border: '#1f293d',
+                            input: '#070a12',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .toast-slide {
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, 100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        /* Soundwave animation for speech playback */
+        .soundwave-bar {
+            animation: soundwave 1s ease-in-out infinite alternate;
+        }
+        .soundwave-bar:nth-child(1) { animation-delay: 0.1s; }
+        .soundwave-bar:nth-child(2) { animation-delay: 0.3s; }
+        .soundwave-bar:nth-child(3) { animation-delay: 0.2s; }
+        .soundwave-bar:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes soundwave {
+            0% { height: 4px; }
+            100% { height: 18px; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-dark-bg text-gray-100 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-brand-600 text-white font-medium text-sm shadow-xl flex items-center gap-2 border border-brand-400/30 toast-slide">
+        <i data-lucide="check-circle" class="w-4 h-4"></i>
+        <span id="toast-msg">Nusxalandi!</span>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="border-b border-dark-border bg-dark-card/60 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i data-lucide="mic" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
+                        UZ<span class="text-brand-accent">TRANSLATE</span>
+                        <span class="text-xs px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">VOICE</span>
+                    </h1>
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Ovozli & Matnli Tarjimon</p>
+                </div>
+            </div>
+
+            <!-- Voice Settings Toolbar -->
+            <div class="flex items-center gap-3">
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-gray-300 hover:text-white transition">
+                    <input type="checkbox" id="auto-speech-toggle" class="sr-only peer">
+                    <div class="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-brand-500 relative"></div>
+                    <span class="hidden sm:inline">Avto-o'qish</span>
+                </label>
+                
+                <div class="h-4 w-px bg-dark-border"></div>
+
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Bepul / API-Keysiz
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Translator App Container -->
+    <main class="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8 flex-grow">
+        
+        <!-- Language Direction Selector & Swap Bar -->
+        <div class="glass-card p-3 rounded-2xl flex items-center justify-between gap-4 max-w-2xl mx-auto border border-dark-border shadow-2xl">
+            <!-- Source Lang -->
+            <div id="src-lang-title" class="flex-1 text-center font-bold text-sm sm:text-base text-brand-accent">
+                O'zbekcha
+            </div>
+
+            <!-- Swap Button -->
+            <button onclick="swapLanguages()" class="p-3 rounded-xl bg-dark-bg hover:bg-brand-500/20 text-brand-accent hover:text-white border border-dark-border hover:border-brand-500/40 transition-all duration-300 transform active:scale-95" title="Tillar o'rnini almashtirish">
+                <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Target Lang -->
+            <div id="target-lang-title" class="flex-1 text-center font-bold text-sm sm:text-base text-gray-300">
+                Inglizcha
+            </div>
+        </div>
+
+        <!-- Translation Boxes Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- INPUT TEXT BOX -->
+            <div class="glass-card rounded-2xl p-5 flex flex-col justify-between border border-dark-border space-y-4 focus-within:border-brand-500/50 transition relative overflow-hidden">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-xs text-gray-400 font-semibold border-b border-dark-border/60 pb-3">
+                        <span id="input-label" class="uppercase tracking-wider">Kiritish (O'zbekcha)</span>
+                        <span id="char-count" class="text-gray-500">0 / 1000</span>
+                    </div>
+
+                    <textarea id="input-text" rows="6" placeholder="Matnni yozing yoki mikrofon orqali gapiring..." 
+                              class="w-full bg-transparent text-gray-100 placeholder-gray-500 resize-none focus:outline-none text-base sm:text-lg leading-relaxed"></textarea>
+                </div>
+
+                <!-- Input Actions Bar -->
+                <div class="flex items-center justify-between pt-2 border-t border-dark-border/60">
+                    <div class="flex items-center gap-2">
+                        <!-- Microphone Speech Recognition Button -->
+                        <button id="mic-btn" onclick="toggleVoiceInput()" class="p-2.5 rounded-xl bg-brand-500/10 hover:bg-brand-500/20 text-brand-accent border border-brand-500/30 transition flex items-center gap-1.5 font-medium text-xs" title="Microfon orqali gapirish">
+                            <i id="mic-icon" data-lucide="mic" class="w-4 h-4"></i>
+                            <span id="mic-status-text">Ovozli kiritish</span>
+                        </button>
+
+                        <!-- Text to Speech -->
+                        <button onclick="speakText('input')" class="p-2.5 rounded-xl hover:bg-dark-hover text-gray-400 hover:text-white transition" title="Ovozli o'qish">
+                            <i data-lucide="volume-2" class="w-5 h-5"></i>
+                        </button>
+
+                        <!-- Clear Input -->
+                        <button onclick="clearInput()" class="p-2.5 rounded-xl hover:bg-dark-hover text-gray-400 hover:text-rose-400 transition" title="Tozalash">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <button onclick="performTranslation()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition active:scale-95">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i> Tarjima
+                    </button>
+                </div>
+
+                <!-- Listening Visualizer Badge -->
+                <div id="listening-badge" class="hidden absolute top-3 right-4 flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs font-bold animate-pulse">
+                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                    Eshitilmoqda...
+                </div>
+            </div>
+
+            <!-- OUTPUT TEXT BOX -->
+            <div class="glass-card rounded-2xl p-5 flex flex-col justify-between border border-dark-border space-y-4 bg-dark-card/90 relative">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-xs text-gray-400 font-semibold border-b border-dark-border/60 pb-3">
+                        <span id="output-label" class="uppercase tracking-wider">Natija (Inglizcha)</span>
+                        <div class="flex items-center gap-2">
+                            <!-- Soundwave visualizer when speaking -->
+                            <div id="soundwave" class="hidden flex items-center gap-1 h-5 px-2">
+                                <div class="w-1 bg-brand-accent rounded-full soundwave-bar"></div>
+                                <div class="w-1 bg-brand-accent rounded-full soundwave-bar"></div>
+                                <div class="w-1 bg-brand-accent rounded-full soundwave-bar"></div>
+                                <div class="w-1 bg-brand-accent rounded-full soundwave-bar"></div>
+                            </div>
+                            <span id="engine-tag" class="text-xs text-brand-accent font-semibold px-2 py-0.5 rounded bg-brand-500/10 border border-brand-500/20">Lug'at tizimi</span>
+                        </div>
+                    </div>
+
+                    <div id="output-text" class="w-full text-gray-200 text-base sm:text-lg min-h-[150px] leading-relaxed whitespace-pre-wrap select-text">
+                        <span class="text-gray-500 italic">Tarjima va ovozli natija bu yerda paydo bo'ladi...</span>
+                    </div>
+                </div>
+
+                <!-- Output Actions -->
+                <div class="flex items-center justify-between pt-2 border-t border-dark-border/60">
+                    <div class="flex items-center gap-2">
+                        <!-- Play/Speak Output -->
+                        <button onclick="speakText('output')" class="px-3 py-2 rounded-xl bg-brand-500/10 hover:bg-brand-500/20 text-brand-accent border border-brand-500/30 transition flex items-center gap-1.5 font-medium text-xs" title="Natijani ovozli o'qish">
+                            <i data-lucide="volume-2" class="w-4 h-4"></i>
+                            <span>O'qib berish</span>
+                        </button>
+                        
+                        <!-- Copy Button -->
+                        <button onclick="copyOutput()" class="p-2.5 rounded-xl hover:bg-dark-hover text-gray-400 hover:text-emerald-400 transition" title="Nusxalash">
+                            <i data-lucide="copy" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <!-- Speed controller -->
+                    <div class="flex items-center gap-1.5 text-xs text-gray-400">
+                        <span>Tezlik:</span>
+                        <select id="speech-speed" class="bg-dark-bg border border-dark-border rounded-lg px-2 py-1 text-xs text-gray-200 focus:outline-none">
+                            <option value="0.8">0.8x</option>
+                            <option value="1.0" selected>1.0x</option>
+                            <option value="1.2">1.2x</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- QUICK PHRASES & DICTIONARY SUGGESTIONS -->
+        <div class="space-y-4">
+            <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i> Tezkor Iboralar & Ovozli Mashq
+            </h3>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                <button onclick="quickPhrase('Salom, qalaysiz?')" class="p-3 rounded-xl bg-dark-card hover:bg-dark-hover border border-dark-border text-left space-y-1 transition group">
+                    <div class="text-xs text-gray-400 group-hover:text-brand-accent">Ko'rishish</div>
+                    <div class="text-sm font-semibold text-white">Salom, qalaysiz?</div>
+                </button>
+                <button onclick="quickPhrase('Rahmat, juda yaxshi!')" class="p-3 rounded-xl bg-dark-card hover:bg-dark-hover border border-dark-border text-left space-y-1 transition group">
+                    <div class="text-xs text-gray-400 group-hover:text-brand-accent">Minnatdorchilik</div>
+                    <div class="text-sm font-semibold text-white">Rahmat, juda yaxshi!</div>
+                </button>
+                <button onclick="quickPhrase('O\'yinda g\'alaba qozondik')" class="p-3 rounded-xl bg-dark-card hover:bg-dark-hover border border-dark-border text-left space-y-1 transition group">
+                    <div class="text-xs text-gray-400 group-hover:text-brand-accent">O'yin / Gaming</div>
+                    <div class="text-sm font-semibold text-white">G'alaba qozondik</div>
+                </button>
+                <button onclick="quickPhrase('Xayrli kun!')" class="p-3 rounded-xl bg-dark-card hover:bg-dark-hover border border-dark-border text-left space-y-1 transition group">
+                    <div class="text-xs text-gray-400 group-hover:text-brand-accent">Aytishuv</div>
+                    <div class="text-sm font-semibold text-white">Xayrli kun!</div>
+                </button>
+                <button onclick="quickPhrase('Sizga omad tilayman')" class="p-3 rounded-xl bg-dark-card hover:bg-dark-hover border border-dark-border text-left space-y-1 transition group">
+                    <div class="text-xs text-gray-400 group-hover:text-brand-accent">Tilak</div>
+                    <div class="text-sm font-semibold text-white">Omad tilayman</div>
+                </button>
+                <button onclick="quickPhrase('Kechirasiz, yordam bera olasizmi?')" class="p-3 rounded-xl bg-dark-card hover:bg-dark-hover border border-dark-border text-left space-y-1 transition group">
+                    <div class="text-xs text-gray-400 group-hover:text-brand-accent">Murojaat</div>
+                    <div class="text-sm font-semibold text-white">Yordam berasizmi?</div>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-border py-6 bg-dark-card/40 text-center text-xs text-gray-500">
+        <p>© 2026 UZTRANSLATE VOICE • O'zbekcha-Inglizcha Ovozli & Matnli Tarjimon</p>
+    </footer>
+
+    <!-- App Engine Script -->
+    <script>
+        // State management
+        let currentDirection = 'uz-en'; // 'uz-en' or 'en-uz'
+        let debounceTimer;
+        let recognition = null;
+        let isRecording = false;
+
+        // Offline Client Dictionary Mapping
+        const offlineDictionary = {
+            'uz-en': {
+                "salom": "hello",
+                "salom, qalaysiz?": "hello, how are you?",
+                "qalaysiz": "how are you",
+                "yaxshi": "good",
+                "rahmat": "thank you",
+                "rahmat, juda yaxshi!": "thank you, very good!",
+                "xayr": "goodbye",
+                "xayrli kun!": "have a good day!",
+                "xayrli kun": "good day",
+                "xayrli tun": "good night",
+                "ha": "yes",
+                "yo'q": "no",
+                "yoq": "no",
+                "iltimos": "please",
+                "kechirasiz": "excuse me",
+                "kechirasiz, yordam bera olasizmi?": "excuse me, can you help me?",
+                "o'yin": "game",
+                "o'yinda g'alaba qozondik": "we won the game",
+                "g'alaba qozondik": "we won",
+                "g'alaba": "victory",
+                "mag'lubiyat": "defeat",
+                "sizga omad tilayman": "i wish you good luck",
+                "omad": "good luck",
+                "kitob": "book",
+                "kompyuter": "computer",
+                "dasturchi": "developer",
+                "kod": "code",
+                "veb sayt": "website",
+                "do'st": "friend",
+                "oilam": "my family"
+            },
+            'en-uz': {
+                "hello": "salom",
+                "hello, how are you?": "salom, qalaysiz?",
+                "how are you": "qalaysiz",
+                "good": "yaxshi",
+                "thank you": "rahmat",
+                "thank you, very good!": "rahmat, juda yaxshi!",
+                "goodbye": "xayr",
+                "have a good day!": "xayrli kun!",
+                "good day": "xayrli kun",
+                "good night": "xayrli tun",
+                "yes": "ha",
+                "no": "yo'q",
+                "please": "iltimos",
+                "excuse me": "kechirasiz",
+                "excuse me, can you help me?": "kechirasiz, yordam bera olasizmi?",
+                "game": "o'yin",
+                "we won the game": "o'yinda g'alaba qozondik",
+                "we won": "biz g'alaba qozondik",
+                "victory": "g'alaba",
+                "defeat": "mag'lubiyat",
+                "i wish you good luck": "sizga omad tilayman",
+                "good luck": "omad",
+                "book": "kitob",
+                "computer": "kompyuter",
+                "developer": "dasturchi",
+                "code": "kod",
+                "website": "veb sayt",
+                "friend": "do'st",
+                "my family": "oilam"
+            }
+        };
+
+        const inputEl = document.getElementById('input-text');
+        const outputEl = document.getElementById('output-text');
+        const charCountEl = document.getElementById('char-count');
+        const autoSpeechToggle = document.getElementById('auto-speech-toggle');
+
+        // Event listener for live typing
+        inputEl.addEventListener('input', () => {
+            const val = inputEl.value;
+            charCountEl.innerText = `${val.length} / 1000`;
+
+            clearTimeout(debounceTimer);
+            if (!val.trim()) {
+                outputEl.innerHTML = `<span class="text-gray-500 italic">Tarjima va ovozli natija bu yerda paydo bo'ladi...</span>`;
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                performTranslation();
+            }, 400);
+        });
+
+        // Initialize Web Speech Recognition
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                console.warn("Speech recognition is not supported in this browser.");
+                return null;
+            }
+
+            const rec = new SpeechRecognition();
+            rec.continuous = false;
+            rec.interimResults = true;
+
+            rec.onstart = () => {
+                isRecording = true;
+                document.getElementById('listening-badge').classList.remove('hidden');
+                document.getElementById('mic-status-text').innerText = "Eshitilmoqda...";
+                document.getElementById('mic-btn').classList.add('bg-rose-500/20', 'border-rose-500/50', 'text-rose-400');
+            };
+
+            rec.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                inputEl.value = transcript;
+                charCountEl.innerText = `${transcript.length} / 1000`;
+            };
+
+            rec.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                stopVoiceInput();
+                showToast("Ovozni tanib bo'lmadi");
+            };
+
+            rec.onend = () => {
+                stopVoiceInput();
+                if (inputEl.value.trim()) {
+                    performTranslation();
+                }
+            };
+
+            return rec;
+        }
+
+        // Toggle Microphone Listening
+        function toggleVoiceInput() {
+            if (!recognition) {
+                recognition = initSpeechRecognition();
+                if (!recognition) {
+                    showToast("Brauzeringiz ovozli kiritishni qo'llab-quvvatlamaydi");
+                    return;
+                }
+            }
+
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                // Set language based on direction
+                recognition.lang = (currentDirection === 'uz-en') ? 'uz-UZ' : 'en-US';
+                try {
+                    recognition.start();
+                } catch (e) {
+                    recognition.stop();
+                }
+            }
+        }
+
+        function stopVoiceInput() {
+            isRecording = false;
+            document.getElementById('listening-badge').classList.add('hidden');
+            document.getElementById('mic-status-text').innerText = "Ovozli kiritish";
+            document.getElementById('mic-btn').classList.remove('bg-rose-500/20', 'border-rose-500/50', 'text-rose-400');
+        }
+
+        // Language Swap Function
+        function swapLanguages() {
+            currentDirection = (currentDirection === 'uz-en') ? 'en-uz' : 'uz-en';
+            
+            const srcTitle = document.getElementById('src-lang-title');
+            const targetTitle = document.getElementById('target-lang-title');
+            const inputLabel = document.getElementById('input-label');
+            const outputLabel = document.getElementById('output-label');
+
+            if (currentDirection === 'uz-en') {
+                srcTitle.innerText = "O'zbekcha";
+                targetTitle.innerText = "Inglizcha";
+                inputLabel.innerText = "Kiritish (O'zbekcha)";
+                outputLabel.innerText = "Natija (Inglizcha)";
+            } else {
+                srcTitle.innerText = "Inglizcha";
+                targetTitle.innerText = "O'zbekcha";
+                inputLabel.innerText = "Kiritish (Inglizcha)";
+                outputLabel.innerText = "Natija (O'zbekcha)";
+            }
+
+            // Swap text contents if available
+            const currentOutput = outputEl.innerText;
+            if (currentOutput && !currentOutput.includes("Tarjima va ovozli")) {
+                inputEl.value = currentOutput;
+                performTranslation();
+            }
+        }
+
+        // Translation Engine
+        async function performTranslation() {
+            const rawText = inputEl.value.trim();
+            if (!rawText) return;
+
+            const cleanText = rawText.toLowerCase();
+
+            // 1. Try local dictionary first
+            const dict = offlineDictionary[currentDirection];
+            if (dict[cleanText]) {
+                outputEl.innerText = dict[cleanText];
+                document.getElementById('engine-tag').innerText = "Offlayn Lug'at";
+                handleAutoSpeech();
+                return;
+            }
+
+            // 2. Fallback to free public endpoint (MyMemory Translation API)
+            outputEl.innerHTML = `<span class="text-brand-accent animate-pulse">Tarjima qilinmoqda...</span>`;
+            document.getElementById('engine-tag').innerText = "Onlayn AI Engine";
+
+            const langPair = (currentDirection === 'uz-en') ? 'uz|en' : 'en|uz';
+            try {
+                const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(rawText)}&langpair=${langPair}`);
+                const data = await response.json();
+
+                if (data && data.responseData && data.responseData.translatedText) {
+                    outputEl.innerText = data.responseData.translatedText;
+                    handleAutoSpeech();
+                } else {
+                    outputEl.innerText = "Tarjima qilishda xatolik yuz berdi.";
+                }
+            } catch (err) {
+                // Final fallback: word by word dictionary replacement
+                let words = rawText.split(' ');
+                let translatedWords = words.map(w => dict[w.toLowerCase()] || w);
+                outputEl.innerText = translatedWords.join(' ');
+                document.getElementById('engine-tag').innerText = "Sodda lug'at";
+                handleAutoSpeech();
+            }
+        }
+
+        // Check and trigger auto-speech option
+        function handleAutoSpeech() {
+            if (autoSpeechToggle && autoSpeechToggle.checked) {
+                setTimeout(() => {
+                    speakText('output');
+                }, 300);
+            }
+        }
+
+        // Quick Phrase Selector
+        function quickPhrase(text) {
+            inputEl.value = text;
+            charCountEl.innerText = `${text.length} / 1000`;
+            performTranslation();
+        }
+
+        // Clear Input
+        function clearInput() {
+            inputEl.value = '';
+            charCountEl.innerText = '0 / 1000';
+            outputEl.innerHTML = `<span class="text-gray-500 italic">Tarjima va ovozli natija bu yerda paydo bo'ladi...</span>`;
+            window.speechSynthesis.cancel();
+            document.getElementById('soundwave').classList.add('hidden');
+        }
+
+        // Copy Result
+        function copyOutput() {
+            const textToCopy = outputEl.innerText;
+            if (!textToCopy || textToCopy.includes("Tarjima va ovozli")) return;
+
+            navigator.clipboard.writeText(textToCopy);
+            showToast("Nusxalandi!");
+        }
+
+        // Speech Synthesis Engine
+        function speakText(type) {
+            window.speechSynthesis.cancel(); // Stop ongoing speech
+
+            const text = (type === 'input') ? inputEl.value : outputEl.innerText;
+            if (!text || text.includes("Tarjima va ovozli")) return;
+
+            const isInput = (type === 'input');
+            const targetLangCode = isInput 
+                ? (currentDirection === 'uz-en' ? 'uz' : 'en') 
+                : (currentDirection === 'uz-en' ? 'en' : 'uz');
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Adjust voice pitch & speed
+            const speedSelect = document.getElementById('speech-speed');
+            utterance.rate = parseFloat(speedSelect.value) || 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+
+            if (targetLangCode === 'en') {
+                utterance.lang = 'en-US';
+                const enVoice = voices.find(v => v.lang.startsWith('en'));
+                if (enVoice) utterance.voice = enVoice;
+            } else {
+                // Uzbek speech fallback strategy
+                utterance.lang = 'uz-UZ';
+                const uzVoice = voices.find(v => v.lang.includes('uz'));
+                if (uzVoice) {
+                    utterance.voice = uzVoice;
+                } else {
+                    // Phonetic fallbacks if native Uzbek TTS voice is missing on device
+                    const fallbackVoice = voices.find(v => v.lang.includes('tr') || v.lang.includes('ru'));
+                    if (fallbackVoice) utterance.voice = fallbackVoice;
+                }
+            }
+
+            const soundwave = document.getElementById('soundwave');
+            
+            utterance.onstart = () => {
+                if (type === 'output') soundwave.classList.remove('hidden');
+            };
+
+            utterance.onend = () => {
+                soundwave.classList.add('hidden');
+            };
+
+            utterance.onerror = () => {
+                soundwave.classList.add('hidden');
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Toast Helper
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2000);
+        }
+
+        // Initialize icons and voices
+        window.onload = function() {
+            lucide.createIcons();
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = () => {
+                    window.speechSynthesis.getVoices();
+                };
+            }
+        }
+    </script>
+</body>
+</html>

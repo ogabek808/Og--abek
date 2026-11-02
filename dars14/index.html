@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#5145e5">
+<title>RejaAI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f5ff;color:#202747;font-family:Arial,sans-serif}
+header{background:#5145e5;color:white;text-align:center;padding:24px}
+main{max-width:700px;margin:20px auto;padding:12px}
+.card{background:white;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 4px 15px #0001}
+h2{margin-top:0}
+label{display:block;margin:12px 0 5px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ccd0e0;border-radius:9px;font-size:16px}
+button{padding:12px 15px;margin-top:10px;border:0;border-radius:9px;background:#5145e5;color:white;font-size:15px;font-weight:bold}
+.stop{background:#dc2626}
+.task{padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:10px;overflow-wrap:anywhere}
+.done{text-decoration:line-through;color:#777}
+.status{background:#f0f1ff;padding:12px;border-radius:9px}
+</style>
+</head>
+
+<button id="soundBtn" onclick="enableSound()"
+style="padding:14px 20px; background:#16a34a; color:white;
+border:0; border-radius:10px; font-size:16px; cursor:pointer;">
+🔊 Ovozni yoqish
+</button>
+
+<script>
+let audioContext;
+
+async function enableSound() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) {
+      alert("Brauzeringiz ovozni qo‘llab-quvvatlamaydi.");
+      return;
+    }
+
+    if (!audioContext) {
+      audioContext = new AudioCtx();
+    }
+
+    if (audioContext.state === "suspended") {
+      await audioContext.resume();
+    }
+
+    playAlarmSound();
+
+    document.getElementById("soundBtn").textContent =
+      "✅ Ovoz yoqildi";
+  } catch (error) {
+    alert("Ovoz yoqilmadi. Sahifani qayta ochib urinib ko‘ring.");
+  }
+}
+
+function playAlarmSound() {
+  if (!audioContext || audioContext.state !== "running") return;
+
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+
+  oscillator.type = "sine";
+  oscillator.frequency.value = 880;
+  gain.gain.value = 0.3;
+
+  oscillator.connect(gain);
+  gain.connect(audioContext.destination);
+
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 0.5);
+}
+</script>
+
+
+<body>
+<header>
+<h1>✦ RejaAI</h1>
+<p>Rejalaringni unutma!</p>
+</header>
+<main>
+<section class="card">
+<h2>➕ Yangi vazifa</h2>
+<form id="form">
+<label>Vazifa nomi</label>
+<input id="title" required placeholder="Dars qilish">
+<label>Sana</label>
+<input id="date" type="date" required>
+<label>Vaqt</label>
+<input id="time" type="time" required>
+<label>Muhimlik</label>
+<select id="priority">
+<option>Muhim</option>
+<option selected>O‘rtacha</option>
+<option>Keyinroq</option>
+</select>
+<label>Izoh</label>
+<textarea id="note"></textarea>
+<button type="submit">Vazifani saqlash</button>
+</form>
+</section>
+
+<section class="card">
+<h2>🔔 Budilnik</h2>
+<button id="enable">Ovoz va bildirishnomani yoqish</button>
+<button id="test">Ovozni sinash</button>
+<p id="status" class="status">Budilnik tayyorlanmagan.</p>
+<button id="stop" class="stop" hidden>⏹ Budilnikni o‘chirish</button>
+</section>
+
+<section class="card">
+<h2>📋 Vazifalarim</h2>
+<p>Jami: <b id="count">0</b></p>
+<div id="list"></div>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const today=new Date();
+$("date").value=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
+
+let tasks=[];
+try{tasks=JSON.parse(localStorage.getItem("rejaai_tasks")||"[]")}catch(e){tasks=[]}
+let audio=null,ring=null,ringing=false,already=new Set();
+
+function save(){
+ localStorage.setItem("rejaai_tasks",JSON.stringify(tasks));
+}
+async function enableSound(){
+ const AC=window.AudioContext||window.webkitAudioContext;
+ if(!AC)throw Error("Audio yo‘q");
+ if(!audio)audio=new AC();
+ if(audio.state==="suspended")await audio.resume();
+ if("Notification"in window&&Notification.permission==="default"){
+  await Notification.requestPermission();
+ }
+}
+function beep(){
+ if(!audio||audio.state!=="running")return;
+ [880,660,880,660].forEach((hz,i)=>{
+  const start=audio.currentTime+i*.2;
+  const osc=audio.createOscillator(),gain=audio.createGain();
+  osc.type="square";osc.frequency.value=hz;
+  gain.gain.setValueAtTime(.001,start);
+  gain.gain.exponentialRampToValueAtTime(.12,start+.02);
+  gain.gain.setValueAtTime(.12,start+.12);
+  gain.gain.exponentialRampToValueAtTime(.001,start+.17);
+  osc.connect(gain);gain.connect(audio.destination);
+  osc.start(start);osc.stop(start+.18);
+ });
+}
+function startAlarm(task){
+ if(ringing)return;
+ ringing=true;
+ $("stop").hidden=false;
+ $("status").textContent="⏰ Budilnik chalmoqda: "+task.title;
+ beep();ring=setInterval(beep,1000);
+ if("Notification"in window&&Notification.permission==="granted"){
+  try{new Notification("RejaAI budilnik",{body:task.title})}catch(e){}
+ }
+}
+function stopAlarm(){
+ ringing=false;
+ if(ring)clearInterval(ring);
+ ring=null;
+ $("stop").hidden=true;
+ $("status").textContent="Budilnik o‘chirildi.";
+}
+$("stop").onclick=stopAlarm;
+$("enable").onclick=async()=>{
+ try{await enableSound();beep();$("status").textContent="Ovoz tayyor!";}catch(e){alert("Ovoz yoqilmadi. Chrome orqali qayta urinib ko‘ring.");}
+};
+$("test").onclick=async()=>{
+ try{await enableSound();beep();}catch(e){alert("Ovoz yoqilmadi.");}
+};
+$("form").onsubmit=e=>{
+ e.preventDefault();
+ tasks.push({
+  id:Date.now()+Math.random(),
+  title:$("title").value.trim(),
+  date:$("date").value,
+  time:$("time").value,
+  priority:$("priority").value,
+  note:$("note").value.trim(),
+  done:false
+ });
+ save();render();e.target.reset();
+ $("date").value=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
+};
+function render(){
+ $("list").replaceChildren();
+ $("count").textContent=tasks.length;
+ tasks.forEach(t=>{
+  const row=document.createElement("div");row.className="task";
+  const title=document.createElement("b");title.textContent=t.title;
+  if(t.done)title.className="done";
+  const info=document.createElement("p");
+  info.textContent=t.date+" "+t.time+" · "+t.priority+(t.note?" · "+t.note:"");
+  const done=document.createElement("button");done.textContent=t.done?"Bajarilmadi":"Bajarildi";
+  done.onclick=()=>{t.done=!t.done;save();render()};
+  const del=document.createElement("button");del.textContent="O‘chirish";
+  del.onclick=()=>{tasks=tasks.filter(x=>x.id!==t.id);save();render()};
+  row.append(title,info,done,del);$("list").append(row);
+ });
+}
+function checkAlarms(){
+ if(ringing)return;
+ const now=Date.now();
+ for(const t of tasks){
+  if(t.done||already.has(t.id))continue;
+  const due=new Date(t.date+"T"+t.time+":00").getTime();
+  if(due<=now&&now-due<60000){
+   already.add(t.id);startAlarm(t);break;
+  }
+ }
+}
+render();
+setInterval(checkAlarms,3000);
+</script>
+</body>
+</html>

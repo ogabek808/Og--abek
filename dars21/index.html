@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ITLIVE Academy — Zamonaviy IT Kurslari</title>
+
+  <!-- CSS Fayllarini To'g'ri Ketma-ketlikda Ulash -->
+  <link rel="stylesheet" href="variables.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="components.css">
+</head>
+<body>
+
+  <!-- Asosiy Sarlavha Bloki -->
+  <header class="header">
+    <span class="header__badge">🚀 ITLIVE ACADEMY 2026</span>
+    <h1 class="header__title">Kelajak Kasblari Akadeimiyasi</h1>
+    <p class="header__subtitle">Amaliyotga yo'naltirilgan zamonaviy kurslar bilan IT sohasida o'z karyerangizni noldan boshlang!</p>
+  </header>
+
+  <!-- Kurs Kartochkalari Konteyneri -->
+  <main class="courses-container">
+
+    <!-- 1-KARTOCHKA: Frontend Development -->
+    <div class="course-card">
+      <div>
+        <h2 class="course-card__title">Frontend Development</h2>
+        <p class="course-card__description">
+          HTML5, CSS3, JavaScript (ES6+) va React freymvorki orqali interaktiv veb-saytlar yaratishni o'rganing.
+        </p>
+        <ul class="course-card__features">
+          <li class="course-card__feature-item">✓ Davomiyligi: 6 oy</li>
+          <li class="course-card__feature-item">✓ Real loyihalar portfoliosi</li>
+          <li class="course-card__feature-item">✓ Mentor yordami</li>
+        </ul>
+      </div>
+      <div>
+        <div class="course-card__price">
+          800,000 <span class="course-card__price-period">so'm/oy</span>
+        </div>
+        <button class="course-card__button" onclick="openEnrollModal('Frontend Development')">Kursga yozilish</button>
+      </div>
+    </div>
+
+    <!-- 2-KARTOCHKA: Python Programming (POPULAR) -->
+    <div class="course-card course-card--popular">
+      <span class="course-card__badge">Popular</span>
+      <div>
+        <h2 class="course-card__title">Python Programming</h2>
+        <p class="course-card__description">
+          Python asoslari, Django freymvorkida murakkab backend tizimlar va Telegram botlar yaratishni noldan o'rganing.
+        </p>
+        <ul class="course-card__features">
+          <li class="course-card__feature-item">✓ Davomiyligi: 7 oy</li>
+          <li class="course-card__feature-item">✓ API va Ma'lumotlar bazasi</li>
+          <li class="course-card__feature-item">✓ Telegram Bot loyihasi</li>
+        </ul>
+      </div>
+      <div>
+        <div class="course-card__price">
+          900,000 <span class="course-card__price-period">so'm/oy</span>
+        </div>
+        <button class="course-card__button" onclick="openEnrollModal('Python Programming')">Kursga yozilish</button>
+      </div>
+    </div>
+
+    <!-- ⭐️ BONUS: 3-KARTOCHKA: Data Science & AI -->
+    <div class="course-card">
+      <div>
+        <h2 class="course-card__title">Data Science & AI</h2>
+        <p class="course-card__description">
+          Ma'lumotlar tahlili, Python Pandas/NumPy va Sun'iy Intellekt (Machine Learning) modellarini amalda qo'llang.
+        </p>
+        <ul class="course-card__features">
+          <li class="course-card__feature-item">✓ Davomiyligi: 8 oy</li>
+          <li class="course-card__feature-item">✓ AI modellarini o'qitish</li>
+          <li class="course-card__feature-item">✓ Amaliy Keyslar</li>
+        </ul>
+      </div>
+      <div>
+        <div class="course-card__price">
+          1,000,000 <span class="course-card__price-period">so'm/oy</span>
+        </div>
+        <button class="course-card__button" onclick="openEnrollModal('Data Science & AI')">Kursga yozilish</button>
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- 📢 TELEGRAM KANALGA OBUNA BO'LISH BANNERI -->
+  <section class="telegram-banner">
+    <div class="telegram-banner__content">
+      <div class="telegram-banner__icon">📢</div>
+      <div class="telegram-banner__text">
+        <h3 class="telegram-banner__title">Bizning Telegram Kanalga Qo'shiling!</h3>
+        <p class="telegram-banner__subtitle">Bepul darslar, IT yangiliklar va eksklyuziv chegirmalarni o'tkazib yubormang.</p>
+      </div>
+    </div>
+    <!-- O'zingizning Telegram kanalingiz havolasini kiriting -->
+    <a href="https://t.me/itlive_uz" target="_blank" class="telegram-banner__button">
+      ✈️ Kanalga obuna bo'lish
+    </a>
+  </section>
+
+
+  <!-- 🤖 REGISTRATSIYA MODAL OYNASI (Telegram Botga yo'naltirish) -->
+  <div class="modal-overlay" id="enrollModal">
+    <div class="modal">
+      <button class="modal__close" onclick="closeEnrollModal()">&times;</button>
+      <h3 class="modal__title" id="modalCourseTitle">Kursga Yozilish</h3>
+      <p class="modal__text">
+        Tanlangan kursga a'zo bo'lish va menejerimiz bilan bog'lanish uchun Telegram botimizga o'ting.
+      </p>
+      <!-- Telegram Bot havolangiz -->
+      <a href="https://t.me/itlive_uz" id="modalTgLink" target="_blank" class="modal__confirm-btn" onclick="closeEnrollModal()">
+        ✈️ Telegram orqali a'zo bo'lish
+      </a>
+    </div>
+  </div>
+
+  <!-- Kichik interaktiv interfeys scripti -->
+  <script>
+    function openEnrollModal(courseName) {
+      document.getElementById('modalCourseTitle').innerText = courseName + " kursiga yozilish";
+      document.getElementById('enrollModal').classList.add('active');
+    }
+
+    function closeEnrollModal() {
+      document.getElementById('enrollModal').classList.remove('active');
+    }
+
+    // Modal tashqarisiga bosilganda yopilishi
+    document.getElementById('enrollModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeEnrollModal();
+      }
+    });
+  </script>
+
+</body>
+</html>

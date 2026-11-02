@@ -1,0 +1,28 @@
+.class{
+    display: flex;
+    background-color: blue;
+    width: 100px;
+    height: 100px;
+    transition: transform 1s linear;
+    animation: azizbek 0.5s ease infinite alternate;
+    align-items: center;
+   
+    
+}
+.class:hover{
+    transform: rotate(360deg);
+}
+@keyframes azizbek{
+    from{
+        transform: translate(80px);
+    }
+    to{
+        transform: translate(40px);
+    }
+
+}
+.button{
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
